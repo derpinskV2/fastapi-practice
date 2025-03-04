@@ -1,0 +1,22 @@
+name: fastapiapi
+
+services:
+  api:
+    build:
+      context: .
+    restart: on-failure
+    expose:
+      - "8000"
+    environment:
+      - DEBUG=TRUE
+    env_file:
+      - envs/default_db.env
+      - envs/api.env
+    volumes:
+      - ./api:/app/
+    networks:
+      - backend
+
+networks:
+    backend:
+        driver: bridge
