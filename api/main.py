@@ -1,11 +1,21 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from routers import health
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 app = FastAPI()
 
-@app.get("/test")
-def hello():
-    return "Hello World"
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[os.getenv("CORS_ALLOWED_ORIGINS")],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+app.include_router(health.router)
 if __name__ == "__main__":
     import uvicorn
 
