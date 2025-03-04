@@ -1,22 +1,61 @@
 name: fastapiapi
 
 services:
-  api:
+  nginx:
+    container_name: nginx
+    hostname: nginx
     build:
-      context: .
-    restart: on-failure
-    expose:
-      - "8000"
-    environment:
-      - DEBUG=TRUE
-    env_file:
-      - envs/default_db.env
-      - envs/api.env
+      context: ./nginx
+      dockerfile: Dockerfile
+    restart: unless-stopped
     volumes:
-      - ./api:/app/
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - api
+    ports:
+      - "80:80"
     networks:
       - backend
 
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: ./api
+    restart: unless-stopped
+    expose:
+      - "8000"
+    ports:
+        - "8000:8000"
+    env_file:
+      - api/.env
+    volumes:
+      - ./api:/app/
+    depends_on:
+      - db
+    networks:
+      - backend
+
+  db:
+    container_name: database
+    hostname: database
+    restart: unless-stopped
+    image: postgres:17.4-bookworm
+    env_file:
+      - api/.env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER}" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - backend
+
+volumes:
+  pgdata:
 networks:
-    backend:
-        driver: bridge
+  backend:
+    driver: bridge
