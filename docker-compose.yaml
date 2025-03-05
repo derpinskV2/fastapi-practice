@@ -54,6 +54,16 @@ services:
     networks:
       - backend
 
+  cache:
+    image: redis:7.4.2
+    container_name: cache
+    hostname: cache
+    restart: unless-stopped
+    expose:
+      - "6379"
+    networks:
+      - backend
+
 volumes:
   pgdata:
 networks:

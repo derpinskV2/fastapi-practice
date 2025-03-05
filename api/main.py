@@ -3,10 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import health
 from dotenv import load_dotenv
 import os
+from routers.test.routes import tests
+
 load_dotenv()
 
 app = FastAPI()
-
+app.include_router(tests.router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[os.getenv("CORS_ALLOWED_ORIGINS")],
@@ -49,9 +51,3 @@ if __name__ == "__main__":
         **uvicorn_configuration,
         reload_includes=["*.py, *.html"],
     )
-
-
-
-
-
-
